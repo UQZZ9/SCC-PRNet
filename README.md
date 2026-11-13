@@ -1,1 +1,1 @@
-# PSCRNet
+# SCC-PRNet
