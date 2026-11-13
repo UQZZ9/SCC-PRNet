@@ -1,0 +1,38 @@
+class_name: SCCPRNet
+trainable: true
+beta: 0
+ckpt: ${ckpt}
+params:
+  channels: ${data.bands}
+  stages: 3
+  dim: 32
+  # Four cascaded SRBs in each spectral/spatial RSRM: a 22 GB GPU-friendly
+  # balance between recurrent refinement capacity and full-resolution memory.
+  srb_depth: 4
+  d_state: 16
+  d_conv: 4
+  expand: 2
+  # Independent spectral/spatial sequences are processed in chunks to bound VRAM.
+  # Larger chunks reduce Mamba kernel-launch overhead; batch=4 FP16 was
+  # validated on the 22 GB server GPU with this setting.
+  sequence_batch_size: 256
+  ssl: ${data.ssl}
+  n_ssl: ${data.n_ssl}
+  ckpt: ${model.ckpt}
+  base:
+    optimizer: ${optim.optimizer}
+    lr_scheduler: ${optim.scheduler}
+    block_inference:
+      use_bi: true
+      block_size: 64
+      overlap: 7
+      padding: reflect
+backtracking:
+  monitor: val_mpsnr
+  mode: max
+  dirpath: backtracking
+  period: 5
+  div_thresh: 4
+  dummy: false
+  lr_decay: 0.8
+id: SCCPRNet_${data.name}_${test.name}_${noise.id}_s${model.params.stages}_d${model.params.dim}_b${model.params.srb_depth}

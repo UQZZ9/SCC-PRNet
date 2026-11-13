@@ -1,0 +1,3 @@
+name: "dcmall"
+seed: ${seed}
+idx_test: ""
